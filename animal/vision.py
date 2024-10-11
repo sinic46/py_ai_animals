@@ -1,10 +1,10 @@
 from pygame import sprite, Vector2
 
-from .enums import enum_animal_type
+from .enums import Enum_Animal_Type
 
 
 class Vision():
-    def __init__(self, angles: list[int], vision_length: float, animal_type: enum_animal_type):
+    def __init__(self, angles: list[int], vision_length: float, animal_type: Enum_Animal_Type):
 
         self.animal_type = animal_type
 
@@ -37,7 +37,7 @@ class Vision_Angle():
 
         self.distance: Vector2
 
-    def get_distanceValues(self, max_distance: float, animal_type: enum_animal_type) -> list[float]:
+    def get_distanceValues(self, max_distance: float, animal_type: Enum_Animal_Type) -> list[float]:
         """ returns a list of 2 values first is distance to sprite, second is if its the same type of animal.
         
         :param max_distance: maximum distance animal can see.

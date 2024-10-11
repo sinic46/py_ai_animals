@@ -1,12 +1,12 @@
 from .basic_animal import Animal
-from .enums import enum_animal_type
+from .enums import Enum_Animal_Type
 from random import randint
 
 
 class Herbivore(Animal):
     def __init__(self, id: int, image_file_path: str, velocity: int,  max_x: int, min_x: int, max_y: int, min_y: int, size: tuple[int, int]):
-        super().__init__(id, enum_animal_type.HERBIVORE, image_file_path,
-                         velocity,  max_x, min_x, max_y, min_y, size)
+        super().__init__(id, Enum_Animal_Type.HERBIVORE, image_file_path,
+                         velocity,  max_x= max_x, min_x= min_x,max_y= max_y, min_y= min_y)
 
     def update(self, DEBUG: bool = False):
         """ this is used to decide which action is taken for the animal.

@@ -8,10 +8,7 @@ from animal.settings import *
 window_x = 2000
 window_y = 100
 
-os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (window_x,window_y)
-
-
-
+os.environ['SDL_VIDEO_WINDOW_POS'] = "%d,%d" % (window_x, window_y)
 
 
 pygame.init()
@@ -23,8 +20,8 @@ screen = pygame.display.set_mode(size)
 pygame.display.set_caption(TITLE)
 
 
-cows = [animal.Cow(count, SCREEN_MAX_X, SCREEN_MIN_X,
-                   SCREEN_MAX_Y, SCREEN_MIN_Y) for count in range(20)]
+cows = [animal.Cow(count, max_x=SCREEN_MAX_X, min_x=SCREEN_MIN_X,
+                   max_y=SCREEN_MAX_Y, min_y=SCREEN_MIN_Y) for count in range(20)]
 
 cows_group: animal.CowGroup = animal.CowGroup()
 
@@ -59,7 +56,7 @@ while active:
     for loop_animal in all_animals_group:
         all_animals_group.remove(loop_animal)
         loop_animal.check_collision(all_animals_group)
-        
+
         loop_animal.set_vision(all_animals_group)
         all_animals_group.add(loop_animal)
 
