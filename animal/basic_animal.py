@@ -1,9 +1,10 @@
 from numpy.random import randint
 from pygame import sprite, image, Vector2, transform, Rect
 import math
-from .enums import enum_animal_type
+from .enums import Enum_Animal_Type, Enum, Enum_Animal_Actions
 from .settings import *
 from .vision import Vision, Vision_Angle
+from genes.dna import Dna
 
 
 class Screen_Size:
@@ -17,14 +18,15 @@ class Screen_Size:
 
 class Animal(sprite.Sprite):
 
-    def __init__(self, id, animal_type: enum_animal_type, image_file_path: str, velocity: int,
-                 max_x: int = SCREEN_MAX_X, min_x: int = SCREEN_MIN_X, max_y: int = SCREEN_MAX_Y, min_y: int = SCREEN_MIN_Y, size: tuple[int, int] = (10, 20)) -> None:
+    def __init__(self, id, animal_type: Enum_Animal_Type, image_file_path: str, velocity: int, Action_enum: Enum = Enum_Animal_Actions,
+                 max_x: int = SCREEN_MAX_X, min_x: int = SCREEN_MIN_X, max_y: int = SCREEN_MAX_Y,
+                 min_y: int = SCREEN_MIN_Y, vision_angles: list[int] = [45, 90, 135, 225, 270, 315], vision_length: int = 20) -> None:
         super().__init__()
         self.screen_size: Screen_Size = Screen_Size(max_x, min_x, max_y, min_y)
         self.image = image.load(image_file_path)
         self.rect: Rect = self.image.get_rect()
         self.original_image = image.load(image_file_path)
-        self.animal_type: enum_animal_type = animal_type
+        self.animal_type: Enum_Animal_Type = animal_type
 
         self.pos = Vector2(x=randint(min_x, max_x), y=randint(min_y, max_y))
 
@@ -41,7 +43,10 @@ class Animal(sprite.Sprite):
         self.energy: int = 100
         self.agility: int = 15
         self.sight_distance: int = 50
-        self.vision: Vision = Vision([45, 90, 135, 225, 270, 315])
+        self.vision: Vision = Vision(vision_angles,vision_length, animal_type)
+
+        self.dna = Dna(action_enum=Action_enum)
+        self.action_enum = Action_enum
 
     def set_new_sprite_location(self, vector: Vector2):
         """ updates the sprite rect object to new location.
@@ -164,7 +169,7 @@ class Animal(sprite.Sprite):
 
     def get_vector_from_angle(self, angle: int, distance: int, set_velocity: bool = False) -> Vector2:
         """ returns a vector based on the angle, distance and sprite postion. can set the sprite velocity_vector if required.
-        
+
         :param angle: the angle in degrees for the vector.
         :param distance: how far the vector needs to be away from sprites position.
         :param set_velocity: boolean if true, sprite velocity_vector will be updated. default is false
@@ -182,5 +187,5 @@ class Animal(sprite.Sprite):
 
 if (__name__ == "__main__"):
 
-    animal1 = Animal(1, enum_animal_type.HERBIVORE, './animal/images/cow.png',
+    animal1 = Animal(1, Enum_Animal_Type.HERBIVORE, './animal/images/cow.png',
                      500, 0, 500, 0)
