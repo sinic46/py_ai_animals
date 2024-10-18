@@ -18,15 +18,18 @@ class Screen_Size:
 
 class Animal(sprite.Sprite):
 
-    def __init__(self, id, animal_type: Enum_Animal_Type, image_file_path: str, velocity: int, Action_enum: Enum = Enum_Animal_Actions,
-                 max_x: int = SCREEN_MAX_X, min_x: int = SCREEN_MIN_X, max_y: int = SCREEN_MAX_Y,
-                 min_y: int = SCREEN_MIN_Y, vision_angles: list[int] = [45, 90, 135, 225, 270, 315], vision_length: int = 20) -> None:
+    def __init__(self, id, animal_type: Enum_Animal_Type, image_file_path: str, velocity: int,
+                 Action_enum: Enum = Enum_Animal_Actions, max_x: int = SCREEN_MAX_X, min_x: int = SCREEN_MIN_X,
+                 max_y: int = SCREEN_MAX_Y, min_y: int = SCREEN_MIN_Y, vision_angles: list[int] = [45,90,135,180,225,270,315],
+                 vision_length: int = 500) -> None:
         super().__init__()
         self.screen_size: Screen_Size = Screen_Size(max_x, min_x, max_y, min_y)
         self.image = image.load(image_file_path)
         self.rect: Rect = self.image.get_rect()
         self.original_image = image.load(image_file_path)
         self.animal_type: Enum_Animal_Type = animal_type
+
+        self.id = id
 
         self.pos = Vector2(x=randint(min_x, max_x), y=randint(min_y, max_y))
 
@@ -41,9 +44,10 @@ class Animal(sprite.Sprite):
 
         self.move_energy_cost: int = 10
         self.energy: int = 100
+        self.max_energy: int = 100
         self.agility: int = 15
-        self.sight_distance: int = 50
-        self.vision: Vision = Vision(vision_angles,vision_length, animal_type)
+        self.sight_distance: int = 500
+        self.vision: Vision = Vision(vision_angles, vision_length, animal_type)
 
         self.dna = Dna(action_enum=Action_enum)
         self.action_enum = Action_enum
@@ -101,15 +105,17 @@ class Animal(sprite.Sprite):
 
         self.set_new_sprite_location(new_pos_vector)
 
-    def update(self, DEBUG: bool = False, ):
+    def update(self):
         """ selects an actionn for the animal to do.
 
         :param DEBUG: defaults to false, if true debug messages will show
 
 
         """
-        if (DEBUG):
+        if (DEBUG and self.id == 1):
             print('update')
+
+            print(self.get_action_inputs())
 
         choice = randint(1, 4)
 
@@ -130,6 +136,7 @@ class Animal(sprite.Sprite):
 
         :param sprite_group: this is the sprite group to check against.
         """
+
         if sprite.spritecollide(self, sprite_group, False):
             if (DEBUG):
                 print('A Collision!!')
@@ -143,29 +150,37 @@ class Animal(sprite.Sprite):
 
         :param sprite_group: this is the spritegroup to check against.
         """
-        for vision_angle in self.vision.vision_angles:
-            self.check_collision_on_line(vision_angle, sprite_group)
+        for angle_index, vision_angle in enumerate(self.vision.vision_angles):
+            self.check_collision_on_line(vision_angle,angle_index, sprite_group)
 
-    def check_collision_on_line(self, vision_angle: Vision_Angle, sprite_group: sprite.Group):
-        """ checks if there are any collisions on long a vision angle from sprite.
+    def check_collision_on_line(self, vision_angle: Vision_Angle,angle_index:int, sprite_group: sprite.Group):
+        """ checks if there are any collisions along a vision angle from sprite.
 
         :param vision_angle: this is the vision angle to check against. 
         :param sprite_group: this is the sprites that are been checked.
 
         """
-        end_point = self.get_vector_from_angle(
+        collision_line = self.get_vector_from_angle(
             vision_angle.angle, self.sight_distance)
 
         for sprite_object in sprite_group:
             sprite_object: sprite.Sprite
-            collision_vector = sprite_object.rect.clipline(self.pos, end_point)
+
+           
+            
+            
+            collision_vector = sprite_object.rect.clipline(
+                (self.pos), (collision_line))
 
             if (collision_vector):
-                vision_angle.sprite = sprite_object
-                vision_angle.distance = collision_vector
+                print('I saw something!')
+
+                self.vision.vision_angles[angle_index].sprite = sprite_object
+                self.vision.vision_angles[angle_index].distance = collision_vector
+
             else:
-                vision_angle.sprite = None
-                vision_angle.distance = None
+                self.vision.vision_angles[angle_index].sprite = None
+                self.vision.vision_angles[angle_index].distance = None
 
     def get_vector_from_angle(self, angle: int, distance: int, set_velocity: bool = False) -> Vector2:
         """ returns a vector based on the angle, distance and sprite postion. can set the sprite velocity_vector if required.
@@ -184,8 +199,19 @@ class Animal(sprite.Sprite):
 
         return current_pos + velocity_vector
 
+    def get_action_inputs(self):
+        """ returns the inputs for the model to predict the next action.
+        """
+        return_values = [self.energy]
+
+        return_values += self.vision.get_vision()
+
+        return return_values
+
 
 if (__name__ == "__main__"):
 
     animal1 = Animal(1, Enum_Animal_Type.HERBIVORE, './animal/images/cow.png',
                      500, 0, 500, 0)
+
+    animal1.get_action_inputs()

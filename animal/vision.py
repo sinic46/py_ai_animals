@@ -1,4 +1,6 @@
+import math
 from pygame import sprite, Vector2
+from math import sqrt
 
 from .enums import Enum_Animal_Type
 
@@ -23,7 +25,7 @@ class Vision():
         return_values: list[float] = []
 
         for vision_angle in self.vision_angles:
-            return_values += vision_angle.get_distanceValues(
+            return_values += vision_angle.get_distance_normalised_values(
                 self.vision_length, self.animal_type)
 
         return return_values
@@ -37,21 +39,33 @@ class Vision_Angle():
 
         self.distance: Vector2
 
-    def get_distanceValues(self, max_distance: float, animal_type: Enum_Animal_Type) -> list[float]:
-        """ returns a list of 2 values first is distance to sprite, second is if its the same type of animal.
-        
+    def get_distance_vector_length(self) -> float:
+        if (self.distance is not None):
+            return math.sqrt((self.distance[0][0] - self.distance[1][0])**2 + (self.distance[0][1] - self.distance[1][1])**2)
+        else:
+            return 0
+
+    def get_distance_normalised_values(self, max_distance: float, animal_type: Enum_Animal_Type) -> list[float]:
+        """ returns a list of 2 values first is a normalised distance to sprite, second is true/false if its the same type of animal.
+
         :param max_distance: maximum distance animal can see.
         :param animal_type: the type of animal vision is from.
 
         """
         return_values = []
 
-        if (self.distance):
-            return_values.append(max_distance / self.distance)
+        if (self.distance) and self.get_distance_vector_length() > 0:
+            return_values.append(
+                float(self.get_distance_vector_length()/max_distance))
+        elif (self.get_distance_vector_length() == 0):
+            return_values.append(0)
         else:
-            return_values.append(max_distance)
+            return_values.append(1.0)
 
-        if (self.sprite.animal_type == animal_type or self.sprite is None):
+        if (self.sprite is None):
+            return_values.append(0.0)
+
+        elif (self.sprite.animal_type == animal_type):
             return_values.append(1.0)
         else:
             return_values.append(0.0)

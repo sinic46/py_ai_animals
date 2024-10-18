@@ -1,5 +1,8 @@
 TITLE = "Animal Simulator"
 
+DEBUG = True
+
+
 SCREEN_MIN_X =0
 SCREEN_MAX_X =1500
 
